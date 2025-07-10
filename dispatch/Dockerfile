@@ -1,10 +1,11 @@
 FROM golang:1.21
 
-WORKDIR /go/src/app
+WORKDIR /app
 
-COPY *.go .
+COPY *.go ./
 
 RUN go mod init dispatch && go mod tidy
-RUN go install
 
-CMD dispatch
+RUN go build -o dispatch
+
+CMD ["./dispatch"]
