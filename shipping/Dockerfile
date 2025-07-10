@@ -1,23 +1,22 @@
 #
 # Build
 #
-FROM debian:10 AS build
-
-# Pre-fix for Java certificate issue
-RUN apt-get update && \
-    apt-get install -y ca-certificates-java && \
-    /var/lib/dpkg/info/ca-certificates-java.postinst configure && \
-    apt-get install -y openjdk-11-jre-headless maven && \
-    apt-get clean && \
-    update-ca-certificates -f
+#
+# Build
+#
+FROM maven:3.6.3-openjdk-11 AS build
 
 WORKDIR /opt/shipping
 
-COPY pom.xml /opt/shipping/
+COPY pom.xml .
 RUN mvn dependency:resolve
-COPY src /opt/shipping/src/
-RUN mvn package
+COPY src ./src
+RUN mvn package -DskipTests
 
+
+#
+# Run
+#
 #
 # Run
 #
@@ -33,3 +32,4 @@ ENV DB_HOST=mysql
 COPY --from=build /opt/shipping/target/shipping-1.0.jar shipping.jar
 
 CMD [ "java", "-Xmn256m", "-Xmx768m", "-jar", "shipping.jar" ]
+
